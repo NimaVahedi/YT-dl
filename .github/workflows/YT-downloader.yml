@@ -97,22 +97,28 @@ jobs:
           # Set format based on quality
           case "$QUALITY" in
             "audio")
-              FORMAT="bestaudio"
+              FORMAT="bestaudio/best"
+              AUDIO_FLAGS="--extract-audio --audio-format mp3"
               ;;
             "best")
               FORMAT="bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+              AUDIO_FLAGS=""
               ;;
             "1080")
               FORMAT="bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080][ext=mp4]/best"
+              AUDIO_FLAGS=""
               ;;
             "720")
               FORMAT="bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]/best"
+              AUDIO_FLAGS=""
               ;;
             "480")
               FORMAT="bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480][ext=mp4]/best"
+              AUDIO_FLAGS=""
               ;;
             *)
               FORMAT="bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+              AUDIO_FLAGS=""
               ;;
           esac
 
@@ -120,7 +126,7 @@ jobs:
           yt-dlp \
             --proxy "socks5://127.0.0.1:1080" \
             --format "$FORMAT" \
-            --merge-output-format mp4 \
+            $AUDIO_FLAGS \
             --output "tmp_downloads/%(title)s.%(ext)s" \
             --no-playlist \
             --retries 10 \
@@ -136,7 +142,7 @@ jobs:
               yt-dlp \
                 --proxy "socks5://127.0.0.1:1080" \
                 --format "$FORMAT" \
-                --merge-output-format mp4 \
+                $AUDIO_FLAGS \
                 --output "tmp_downloads/%(title)s.%(ext)s" \
                 --no-playlist \
                 --retries 10 \
