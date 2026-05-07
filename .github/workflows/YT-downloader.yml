@@ -17,6 +17,11 @@ on:
         required: false
         default: '90'
         type: string
+      branch:
+        description: 'Save the video in this branch'
+        required: true
+        default: 'main'
+        type: string
 
 jobs:
   download-youtube:
@@ -176,7 +181,7 @@ jobs:
 
       - name: Commit & Push
         run: |
-          BRANCH="${GITHUB_REF_NAME}"
+          BRANCH="${{ github.event.inputs.branch }}"
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
