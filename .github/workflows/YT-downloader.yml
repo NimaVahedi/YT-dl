@@ -205,12 +205,6 @@ jobs:
           done
           rm -rf tmp_downloads
 
-      - name: Stop WARP Container
-        if: always()
-        run: |
-          docker stop warp || true
-          docker rm warp || true
-
       - name: Commit & Push
         run: |
           if [ "${{ github.event.inputs.save_in_new_branch }}" == "true" ]; then
