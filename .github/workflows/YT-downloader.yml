@@ -17,6 +17,11 @@ on:
         required: false
         default: '90'
         type: string
+      save_in_new_branch:
+        description: 'Save the video into a new branch'
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   download-youtube:
@@ -182,7 +187,11 @@ jobs:
 
       - name: Commit & Push
         run: |
-          BRANCH="${GITHUB_REF_NAME}"
+          if [ "${{ github.event.inputs.save_in_new_branch }}" == "true" ]; then
+            BRANCH="$(date | tr -c '[:alnum:]' '_')_$(ls -la videos| sha1sum | cut -f 1 -d ' ')"
+          else
+            BRANCH="${GITHUB_REF_NAME}"
+          fi
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
