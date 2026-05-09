@@ -95,11 +95,27 @@ jobs:
             echo "Response: $FINAL"
           fi
 
-      - name: Cache APT packages
-        uses: awalsh128/cache-apt-pkgs-action@latest
+      - name: Cache apt packages
+        id: cache-apt
+        uses: actions/cache@v4
         with:
-          packages: python3-pip ffmpeg zip curl jq
-          version: 1.0
+          path: ~/apt-cache
+          key: apt-packages-${{ runner.os }}-v1
+
+      - name: Install all packages
+        run: |
+          if [ -d ~/apt-cache ]; then
+            echo "📦 Using cached apt packages..."
+            sudo cp ~/apt-cache/*.deb /var/cache/apt/archives/ 2>/dev/null || true
+          fi
+          
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg python3-pip zip curl jq
+          
+          # Cache the debs for next time
+          mkdir -p ~/apt-cache
+          sudo cp /var/cache/apt/archives/*.deb ~/apt-cache/
+          sudo chmod 644 ~/apt-cache/*.deb
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -115,7 +131,7 @@ jobs:
       - name: Download YouTube Video
         run: |
 
-          sudo apt install -y ffmpeg
+          #sudo apt install -y ffmpeg
 
           URL="${{ github.event.inputs.youtube_url }}"
           QUALITY="${{ github.event.inputs.quality }}"
