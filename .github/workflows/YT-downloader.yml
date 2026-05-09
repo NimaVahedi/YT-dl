@@ -125,7 +125,6 @@ jobs:
           URL="${{ github.event.inputs.youtube_url }}"
           QUALITY="${{ github.event.inputs.quality }}"
           SPLIT_MB="${{ github.event.inputs.split_threshold_mb }}"
-          SPLIT_BYTES=$(( SPLIT_MB * 1024 * 1024 ))
 
           mkdir -p videos tmp_downloads
 
@@ -140,7 +139,7 @@ jobs:
 
           echo "✅ Download complete!"
           ls -la tmp_downloads/
-
+  
           for FILE in tmp_downloads/*; do
             [ -f "$FILE" ] || continue
             filename_normalized=$(basename "$FILE" | tr -c '[:alnum:]' _)
@@ -149,7 +148,7 @@ jobs:
             ./scripts/partition_file_into_zips.sh \
               "$FILE" \
               "$outdir" \
-              "$SPLIT_BYTES"
+              "$SPLIT_MB"
           done
           rm -rf tmp_downloads
 
@@ -157,6 +156,7 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.save_in_new_branch }}" == "true" ]; then
             BRANCH="$(date | tr -c '[:alnum:]' '_')_$(ls -la videos| sha1sum | cut -f 1 -d ' ')"
+            git checkout -b $BRANCH
           else
             BRANCH="${GITHUB_REF_NAME}"
           fi
@@ -174,11 +174,10 @@ jobs:
 
           for dir in $(find videos -mindepth 1 -maxdepth 1 -type d); do
             git add -f $dir # ← اینجا -f اضافه شد
-            echo commiting $dir
             git commit -m "YT-DL: $dir"
 
             # Pull with rebase before each push
-            git push --set-upstream origin HEAD:"$BRANCH"
+            git push --set-upstream origin $BRANCH
           done
 
           echo "🎉 All $TOTAL files pushed"

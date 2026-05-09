@@ -7,7 +7,8 @@ fi
 
 INPUT_FILE="$1"
 OUTPUT_DIR="$2"
-SPLIT_BYTES="$3"
+SPLIT_MB="$3"
+SPLIT_BYTES=$(( SPLIT_MB * 1024 * 1024 ))
 
 # Handle file splitting
 SIZE=$(stat -c%s "$INPUT_FILE")
