@@ -6,7 +6,7 @@ fi
 
 echo "waiting for warp $tries times"
 
-for i in {1..$tries}; do
+for i in $(seq $tries); do
     sleep 1
     RESULT=$(curl -s --max-time 10 --socks5-hostname 127.0.0.1:1080 https://cloudflare.com/cdn-cgi/trace 2>/dev/null || echo "failed")
     echo "$RESULT"
