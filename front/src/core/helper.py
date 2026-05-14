@@ -57,4 +57,4 @@ def subprocess_popen_poll(popen_args, print_func, root = None):
     if returncode != 0:
         print_func(f"error {popen_args} (exit code: {returncode})")
 
-    return returncode
+    return -returncode

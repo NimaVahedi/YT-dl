@@ -57,8 +57,9 @@ def github_login_new_term():
             subprocess.Popen(terminal_cmd)
 
     except Exception as e:
-        return 1
-    
+        return -1
+    return 0
+
 def get_username():
     result = subprocess.run([conf["git_path"], "config", "user.name"], capture_output=True)
 
@@ -79,7 +80,7 @@ def clone(repo, branch):
         logger.info
         )
 
-    if err != 0:
+    if err < 0:
         logger.error(f"error cloning")
     return err
 
@@ -96,12 +97,12 @@ def run_workflow(repo, workflow, inputs):
     )
     if result.returncode != 0:
         logger.error(f"error running workflow: {workflow} for repo {repo}")
-        return None
+        return -result.returncode
 
     id = re.search(id_from_output_regex, result.stdout.decode()).group(1)
     logger.info(f"workflow started with id: {id}")
 
-    return id
+    return int(id)
 
 def _decode_list_workflow_runs_line(line : str):
     """
@@ -127,7 +128,7 @@ def _decode_list_workflow_runs_line(line : str):
 def delete_workflow_run_log(repo, id):
     cmd = [conf["gh_path"], "api", "-X", "DELETE", f"repos/{repo}/actions/runs/{id}"]
     err = helper.subprocess_popen_poll(cmd, logger.info)
-    if err != 0:
+    if err < 0:
         logger.error(f"failed to delete workflow run: {id}")
     return err
 
@@ -141,7 +142,7 @@ def list_workflow_runs(repo):
     result = subprocess.run(cmd, capture_output=True)
     if result.returncode != 0:
         logger.error("failed to list workflow runs")
-        return result.returncode
+        return None
 
     result_raw = result.stdout\
                 .decode()\
@@ -154,7 +155,7 @@ def clear_workflow_runs_log(repo):
     logger.info("clearing workflow history")
     for log in logs:
         err = delete_workflow_run_log(repo, log["id"])
-        if err != 0:
+        if err < 0:
             logger.error(f"failed to delete workflow run {id}")
 
 def list_branches(repo):
@@ -178,4 +179,4 @@ def setup_git():
     if result.returncode != 0:
         logger.error("error setting up git")
 
-    return result.returncode
+    return -result.returncode
