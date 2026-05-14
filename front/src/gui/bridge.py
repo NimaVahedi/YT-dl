@@ -65,6 +65,7 @@ def github_login():
             logger.error("failed to get user")
             err = 1
             break
+        break
     logger.info("done")
 
 def clear_download_history():
