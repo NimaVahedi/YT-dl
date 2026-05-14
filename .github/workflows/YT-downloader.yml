@@ -22,6 +22,10 @@ on:
         required: true
         default: true
         type: boolean
+      use_this_branch_name:
+        description: 'If provided, the new branch will be named after the input, depends on save_in_new_branch=true'
+        required: false
+        type: string
 
 jobs:
   download-youtube:
@@ -148,13 +152,19 @@ jobs:
       - name: Commit & Push
         run: |
           if [ "${{ github.event.inputs.save_in_new_branch }}" == "true" ]; then
-            BRANCH="$(date "+%Y.%m.%d.%M.%S")_$(ls -la videos| sha1sum | cut -f 1 -d ' ')"
+            if [ -n "${{ github.event.inputs.use_this_branch_name }}" ]; then
+              BRANCH="${{ github.event.inputs.use_this_branch_name }}"
+            else
+              BRANCH="$(date "+%Y.%m.%d.%M.%S")_$(ls -la videos| sha1sum | cut -f 1 -d ' ')"
+            fi
             git checkout -b $BRANCH
           else
             BRANCH="${GITHUB_REF_NAME}"
           fi
+
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+
           echo "Preparing to commit files..."
 
           # Check if videos folder has any files
